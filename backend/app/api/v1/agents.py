@@ -32,27 +32,39 @@ async def trigger_discovery(
     """
     filter_dict = {
         "industry": payload.industry,
+        "category": payload.category or payload.industry,
+        "subcategory": payload.subcategory,
         "country": payload.country,
         "state": payload.state,
         "city": payload.city,
+        "area": payload.area,
         "company_size": payload.company_size,
         "technology": payload.technology,
         "service_type": payload.service_type or payload.target_service,
         "website_status": payload.website_status,
-        "buying_intent": payload.buying_intent,
+        "whatsapp_signal": payload.whatsapp_signal,
+        "buying_intent": payload.buying_intent or payload.min_intent,
         "min_score": payload.min_score,
-        "search_query": payload.search_query or payload.search_keywords,
+        "search_query": payload.search_query or (payload.search_keywords if isinstance(payload.search_keywords, str) else " ".join(payload.search_keywords or [])),
+        "search_keywords": payload.search_keywords,
         "buying_signals": payload.buying_signals,
-        "limit": payload.limit or payload.max_results
+        "source_type": payload.source_type,
+        "global_search": payload.global_search,
+        "limit": payload.limit or payload.max_results or 10
     }
 
     start_time = datetime.now(timezone.utc)
     
+    query_desc = (
+        payload.search_query or 
+        (f"{payload.category or payload.industry or 'Businesses'} in {payload.area or payload.city or payload.country or 'India'}")
+    )
+    
     # Create DiscoveryRun record
     run_record = DiscoveryRun(
-        query=payload.search_query or payload.search_keywords or f"{payload.industry} in {payload.city or payload.country}",
-        location=payload.city or payload.country or "India",
-        industry=payload.industry or "All",
+        query=query_desc,
+        location=f"{payload.area + ', ' if payload.area else ''}{payload.city or payload.country or 'India'}",
+        industry=payload.category or payload.industry or "All",
         target_service=payload.service_type or payload.target_service or "All",
         website_status_filter=payload.website_status or "All",
         buying_intent_filter=payload.buying_intent or "All",

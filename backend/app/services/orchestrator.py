@@ -50,22 +50,52 @@ class AgentOrchestrator:
             # Duplicate check
             existing = await discovery_service.check_duplicate(db, cand.get("domain", ""), cand["company_name"], cand.get("phone"))
             if existing:
-                logger.info(f"Skipping duplicate lead: {cand['company_name']}")
+                logger.info(f"Updating existing lead: {cand['company_name']}")
+                existing.category = cand.get("category", existing.category)
+                existing.area = cand.get("area", existing.area)
+                existing.whatsapp_status = cand.get("whatsapp_status", existing.whatsapp_status)
+                existing.rating = cand.get("rating", existing.rating)
+                existing.review_count = cand.get("review_count", existing.review_count)
+                existing.global_fit_score = cand.get("global_fit_score", existing.global_fit_score)
+                existing.outsourcing_fit = cand.get("outsourcing_fit", existing.outsourcing_fit)
+                existing.last_verified_at = now
+                created_leads.append(existing)
                 continue
 
             lead = Lead(
                 company_name=cand["company_name"],
+                business_name=cand.get("business_name"),
                 domain=discovery_service.normalize_domain(cand.get("domain", "")),
                 website_url=cand.get("website_url", ""),
+                category=cand.get("category"),
+                subcategory=cand.get("subcategory"),
                 country=cand.get("country", "India"),
                 state=cand.get("state", ""),
                 city=cand.get("city", ""),
+                area=cand.get("area"),
+                address=cand.get("address"),
+                postal_code=cand.get("postal_code"),
                 industry=cand.get("industry", "Technology"),
                 company_size=cand.get("company_size", "11-50"),
                 linkedin_url=cand.get("linkedin_url"),
                 phone=cand.get("phone"),
                 phone_status=cand.get("phone_status", "PUBLIC"),
+                phone_source_url=cand.get("phone_source_url"),
+                phone_source_name=cand.get("phone_source_name"),
+                phone_verification_method=cand.get("phone_verification_method", "Public Directory Inspection"),
+                whatsapp_status=cand.get("whatsapp_status", "WHATSAPP_UNKNOWN"),
+                whatsapp_verification_method=cand.get("whatsapp_verification_method", "Unverified link only"),
                 lead_type=cand.get("lead_type", "REAL"),
+                source_type=cand.get("source_type", "PUBLIC_BUSINESS_DIRECTORY"),
+                usage_permission=cand.get("usage_permission", "Public Business Registry Data - Permitted Discovery Use"),
+                rating=cand.get("rating"),
+                review_count=cand.get("review_count", 0),
+                years_in_business=cand.get("years_in_business"),
+                business_description=cand.get("business_description"),
+                hours=cand.get("hours"),
+                social_profiles=cand.get("social_profiles", {}),
+                global_fit_score=cand.get("global_fit_score", 0.0),
+                outsourcing_fit=cand.get("outsourcing_fit", "MEDIUM"),
                 website_status=cand.get("website_status", "WEBSITE_PLUS_AUTOMATION"),
                 buying_intent=cand.get("buying_intent", "HIGH"),
                 intent_signal=cand.get("intent_signal", ""),
@@ -89,9 +119,12 @@ class AgentOrchestrator:
                 action="Lead Discovered & Provenance Tagged",
                 details={
                     "industry": lead.industry,
+                    "category": lead.category,
+                    "area": lead.area,
                     "lead_type": lead.lead_type,
                     "website_status": lead.website_status,
-                    "buying_intent": lead.buying_intent
+                    "buying_intent": lead.buying_intent,
+                    "source_type": lead.source_type
                 }
             )
             db.add(act)

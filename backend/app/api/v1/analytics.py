@@ -37,23 +37,29 @@ async def get_dashboard_analytics(
     explicit_buyer_intent = 0
     research_completed = 0
     real_leads_count = 0
-    total_score = 0
-    scored_count = 0
+    local_leads_count = 0
+    foreign_leads_count = 0
+    whatsapp_signals_count = 0
+    public_emails_count = 0
 
+    category_counts: Dict[str, int] = {}
+    city_counts: Dict[str, int] = {}
+    source_type_counts: Dict[str, int] = {}
+    lead_type_counts: Dict[str, int] = {}
+    website_status_counts: Dict[str, int] = {}
+    intent_counts: Dict[str, int] = {}
     industry_counts: Dict[str, int] = {}
     location_counts: Dict[str, int] = {}
     status_counts: Dict[str, int] = {}
     service_counts: Dict[str, int] = {}
-    website_status_counts: Dict[str, int] = {}
-    intent_counts: Dict[str, int] = {}
-    lead_type_counts: Dict[str, int] = {}
-    
-    score_dist = {
-        "0-39 (Cold)": 0,
-        "40-59 (Moderate)": 0,
+    score_dist: Dict[str, int] = {
+        "80-100 (Hot)": 0,
         "60-79 (Warm)": 0,
-        "80-100 (Hot)": 0
+        "40-59 (Moderate)": 0,
+        "0-39 (Cold)": 0
     }
+    total_score = 0.0
+    scored_count = 0
 
     for lead in leads:
         # Created today check
@@ -62,11 +68,39 @@ async def get_dashboard_analytics(
             if created_tz >= today_start - timedelta(days=1):
                 new_leads_today += 1
 
+        # Local vs Foreign
+        if (lead.country or "India").lower() == "india":
+            local_leads_count += 1
+        else:
+            foreign_leads_count += 1
+
+        # WhatsApp signals
+        ws_stat = getattr(lead, 'whatsapp_status', 'WHATSAPP_UNKNOWN') or 'WHATSAPP_UNKNOWN'
+        if ws_stat in ["BUSINESS_PUBLICLY_ADVERTISES_WHATSAPP", "WHATSAPP_CONFIRMED"]:
+            whatsapp_signals_count += 1
+
+        # Public emails
+        if lead.decision_makers:
+            if any(dm.email and dm.email_status in ["VERIFIED", "PUBLIC"] for dm in lead.decision_makers):
+                public_emails_count += 1
+
         # Provenance / Lead Type
         lt = getattr(lead, 'lead_type', 'REAL') or 'REAL'
         lead_type_counts[lt] = lead_type_counts.get(lt, 0) + 1
         if lt == "REAL":
             real_leads_count += 1
+
+        # Source Type
+        stype = getattr(lead, 'source_type', 'PUBLIC_BUSINESS_DIRECTORY') or 'PUBLIC_BUSINESS_DIRECTORY'
+        source_type_counts[stype] = source_type_counts.get(stype, 0) + 1
+
+        # Category
+        cat = lead.category or lead.industry or "General Business"
+        category_counts[cat] = category_counts.get(cat, 0) + 1
+
+        # City
+        ct = lead.city or "Other"
+        city_counts[ct] = city_counts.get(ct, 0) + 1
 
         # Website Status
         ws = getattr(lead, 'website_status', 'WEBSITE_PLUS_AUTOMATION') or 'WEBSITE_PLUS_AUTOMATION'
@@ -144,6 +178,9 @@ async def get_dashboard_analytics(
     website_status_data = [{"status": k, "count": v} for k, v in sorted(website_status_counts.items(), key=lambda x: x[1], reverse=True)]
     intent_data = [{"intent": k, "count": v} for k, v in sorted(intent_counts.items(), key=lambda x: x[1], reverse=True)]
     lead_type_data = [{"type": k, "count": v} for k, v in lead_type_counts.items()]
+    category_data = [{"category": k, "count": v} for k, v in sorted(category_counts.items(), key=lambda x: x[1], reverse=True)]
+    city_data = [{"city": k, "count": v} for k, v in sorted(city_counts.items(), key=lambda x: x[1], reverse=True)]
+    source_type_data = [{"source": k.replace("_", " "), "count": v} for k, v in sorted(source_type_counts.items(), key=lambda x: x[1], reverse=True)]
 
     recent_leads = [
         {
@@ -177,6 +214,10 @@ async def get_dashboard_analytics(
             "explicit_buyer_intent": explicit_buyer_intent,
             "research_completed": research_completed,
             "real_leads_count": real_leads_count,
+            "local_leads_count": local_leads_count,
+            "foreign_leads_count": foreign_leads_count,
+            "whatsapp_signals_count": whatsapp_signals_count,
+            "public_emails_count": public_emails_count,
             "avg_qualification_score": avg_score,
             "total_pipeline_value": total_pipeline_val,
             "avg_deal_value": avg_deal_val,
@@ -189,7 +230,10 @@ async def get_dashboard_analytics(
             "pipeline_stages": pipeline_data,
             "website_status_distribution": website_status_data,
             "buying_intent_distribution": intent_data,
-            "lead_type_distribution": lead_type_data
+            "lead_type_distribution": lead_type_data,
+            "category_distribution": category_data,
+            "city_distribution": city_data,
+            "source_distribution": source_type_data
         },
         "industry_breakdown": industry_data,
         "service_distribution": service_data,

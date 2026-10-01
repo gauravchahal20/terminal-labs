@@ -247,6 +247,44 @@ export class ApiService {
     });
   }
 
+  // Business Directory Search (Phase 5 Local & Global Discovery Engine)
+  static async searchDirectory(params: {
+    category?: string;
+    city?: string;
+    area?: string;
+    country?: string;
+    website_status?: string;
+    whatsapp_signal?: string;
+    buying_intent?: string;
+    keywords?: string;
+    limit?: number;
+  }): Promise<{ status: string; query: any; total_results: number; businesses: any[] }> {
+    const query = new URLSearchParams();
+    if (params.category && params.category !== "All") query.append("category", params.category);
+    if (params.city && params.city !== "All") query.append("city", params.city);
+    if (params.area && params.area !== "All") query.append("area", params.area);
+    if (params.country) query.append("country", params.country);
+    if (params.website_status) query.append("website_status", params.website_status);
+    if (params.whatsapp_signal) query.append("whatsapp_signal", params.whatsapp_signal);
+    if (params.buying_intent) query.append("buying_intent", params.buying_intent);
+    if (params.keywords) query.append("keywords", params.keywords);
+    if (params.limit) query.append("limit", params.limit.toString());
+
+    return this.request(`/leads/directory/search?${query.toString()}`);
+  }
+
+  static async importCandidateToCRM(candidate: any): Promise<Lead> {
+    return this.request<Lead>("/leads/directory/import-to-crm", {
+      method: "POST",
+      body: JSON.stringify(candidate),
+    });
+  }
+
+  // Production Readiness & Quality Audit (Phase 4 / 5)
+  static async getProductionReadiness(): Promise<any> {
+    return this.request("/analytics/production-readiness");
+  }
+
   // Health
   static async getHealth(): Promise<{ status: string; service: string; environment: string; demo_mode: boolean }> {
     return this.request("/health");

@@ -437,3 +437,76 @@ async def run_full_lead_pipeline(
 ):
     await orchestrator.run_full_pipeline_for_lead(db, lead_id)
     return await get_lead_detail(lead_id, db, auth)
+
+@router.get("/directory/search")
+async def search_local_business_directory(
+    category: Optional[str] = Query(None, description="Category (e.g. Dental, Healthcare, Restaurants, Manufacturing)"),
+    city: Optional[str] = Query(None, description="City (e.g. Chandigarh, Mohali, Delhi, Gurgaon, Mumbai)"),
+    area: Optional[str] = Query(None, description="Area (e.g. Sector 17, Sector 35, Connaught Place)"),
+    country: Optional[str] = Query("India", description="Country"),
+    website_status: Optional[str] = Query("All", description="Website status filter"),
+    whatsapp_signal: Optional[str] = Query("All", description="WhatsApp action / signal"),
+    buying_intent: Optional[str] = Query("All", description="Buying intent"),
+    keywords: Optional[str] = Query(None, description="Search keywords"),
+    limit: int = Query(25, ge=1, le=100),
+    auth: dict = Depends(verify_token)
+):
+    """
+    Justdial-like Business Directory Search Engine.
+    Discovers local and foreign business targets with explicit source provenance and no fabrication.
+    """
+    results = discovery_service.generate_candidate_leads(
+        category=category,
+        city=city,
+        area=area,
+        country=country,
+        website_status=website_status if website_status != "All" else None,
+        whatsapp_signal=whatsapp_signal if whatsapp_signal != "All" else None,
+        buying_intent=buying_intent if buying_intent != "All" else None,
+        search_keywords=keywords,
+        limit=limit
+    )
+
+    return {
+        "status": "success",
+        "query": {
+            "category": category or "All",
+            "city": city or "All",
+            "area": area or "All",
+            "country": country,
+            "website_status": website_status,
+            "whatsapp_signal": whatsapp_signal,
+            "keywords": keywords,
+            "limit": limit
+        },
+        "total_results": len(results),
+        "businesses": results
+    }
+
+@router.post("/directory/import-to-crm")
+async def import_discovery_candidate_to_crm(
+    candidate: dict,
+    db: AsyncSession = Depends(get_db),
+    auth: dict = Depends(verify_token)
+):
+    """
+    Imports a candidate from directory search into CRM, runs multi-agent qualification, and returns the full dossier.
+    """
+    created_leads = await orchestrator.run_discovery_agent(db, {
+        "category": candidate.get("category"),
+        "city": candidate.get("city"),
+        "search_query": candidate.get("company_name"),
+        "limit": 1
+    })
+
+    if not created_leads:
+        existing = await discovery_service.check_duplicate(db, candidate.get("domain", ""), candidate.get("company_name", ""), candidate.get("phone"))
+        if existing:
+            await orchestrator.run_full_pipeline_for_lead(db, existing.id)
+            return await get_lead_detail(existing.id, db, auth)
+        raise HTTPException(status_code=400, detail="Could not import candidate into CRM.")
+
+    lead = created_leads[0]
+    await orchestrator.run_full_pipeline_for_lead(db, lead.id)
+    return await get_lead_detail(lead.id, db, auth)
+

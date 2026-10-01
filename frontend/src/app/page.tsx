@@ -16,6 +16,8 @@ import { ResearchPanelView } from "@/components/ResearchPanelView";
 import { EmailSettingsModal } from "@/components/EmailSettingsModal";
 import { CampaignSequenceView } from "@/components/CampaignSequenceView";
 import { DirectoryExtractorModal } from "@/components/DirectoryExtractorModal";
+import { LocalDiscoveryView } from "@/components/LocalDiscoveryView";
+import { ProductionReadinessModal } from "@/components/ProductionReadinessModal";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<NavTab>("dashboard");
@@ -36,6 +38,7 @@ export default function Home() {
   const [isNewLeadModalOpen, setIsNewLeadModalOpen] = useState(false);
   const [isEmailSettingsOpen, setIsEmailSettingsOpen] = useState(false);
   const [isDirectoryExtractorOpen, setIsDirectoryExtractorOpen] = useState(false);
+  const [isProductionAuditOpen, setIsProductionAuditOpen] = useState(false);
 
   // Email Connection State
   const [connectedEmail, setConnectedEmail] = useState("partnerships@terminallabs.com");
@@ -190,6 +193,7 @@ export default function Home() {
   const getTabDisplayName = () => {
     switch (activeTab) {
       case "dashboard": return "Overview";
+      case "discovery": return "Prospector Engine";
       case "leads": return "Lead Intelligence";
       case "companies": return "Companies";
       case "research": return "Research";
@@ -216,6 +220,7 @@ export default function Home() {
         leadCount={leads.length}
         onOpenServices={() => setIsServicesCatalogOpen(true)}
         onOpenDirectoryExtractor={() => setIsDirectoryExtractorOpen(true)}
+        onOpenAudit={() => setIsProductionAuditOpen(true)}
       />
 
       {/* 2. MAIN CONTENT AREA */}
@@ -252,6 +257,19 @@ export default function Home() {
                   onOpenAgentTerminal={() => setIsAgentTerminalOpen(true)}
                   onExploreServices={() => setIsServicesCatalogOpen(true)}
                   onViewAllLeads={handleViewAllLeadsFiltered}
+                />
+              )}
+
+              {activeTab === "discovery" && (
+                <LocalDiscoveryView
+                  onSelectLead={(lead) => setSelectedLeadId(lead.id)}
+                  onLeadImported={(lead) => {
+                    refreshData();
+                    setSelectedLeadId(lead.id);
+                  }}
+                  onOpenOutreach={(lead) => {
+                    setSelectedLeadId(lead.id);
+                  }}
                 />
               )}
 
@@ -350,6 +368,11 @@ export default function Home() {
         isOpen={isDirectoryExtractorOpen}
         onClose={() => setIsDirectoryExtractorOpen(false)}
         onLeadsIngested={() => refreshData()}
+      />
+
+      <ProductionReadinessModal
+        isOpen={isProductionAuditOpen}
+        onClose={() => setIsProductionAuditOpen(false)}
       />
     </div>
   );

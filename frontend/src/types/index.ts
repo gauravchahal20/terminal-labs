@@ -163,9 +163,32 @@ export interface ActivityLog {
   timestamp: string;
 }
 
+export type WhatsAppStatus =
+  | "WHATSAPP_CONFIRMED"
+  | "BUSINESS_PUBLICLY_ADVERTISES_WHATSAPP"
+  | "PUBLIC_PHONE_ONLY"
+  | "WHATSAPP_UNKNOWN"
+  | "INVALID"
+  | "UNKNOWN";
+
+export type SourceType =
+  | "AUTHORIZED_BUSINESS_API"
+  | "PUBLIC_BUSINESS_DIRECTORY"
+  | "PUBLIC_COMPANY_WEBSITE"
+  | "PUBLIC_BUSINESS_PROFILE"
+  | "USER_PROVIDED_CSV"
+  | "USER_PROVIDED_DATASET"
+  | "AUTHORIZED_SEARCH_PROVIDER";
+
 export interface Lead {
   id: string;
   company_name: string;
+  business_name?: string;
+  category?: string;
+  subcategory?: string;
+  area?: string;
+  address?: string;
+  postal_code?: string;
   domain: string;
   website_url: string;
   country: string;
@@ -177,6 +200,23 @@ export interface Lead {
   twitter_url?: string;
   phone?: string;
   phone_status?: VerificationStatus;
+  phone_source_name?: string;
+  phone_source_url?: string;
+  phone_observed_at?: string;
+  phone_verification_method?: string;
+  whatsapp_status?: WhatsAppStatus;
+  whatsapp_source?: string;
+  whatsapp_verification_method?: string;
+  rating?: number;
+  review_count?: number;
+  years_in_business?: number;
+  business_description?: string;
+  hours?: string;
+  social_profiles?: Record<string, string>;
+  global_fit_score?: number;
+  outsourcing_fit?: string;
+  source_type?: SourceType;
+  usage_permission?: string;
   lead_type?: LeadType;
   website_status?: WebsiteStatus;
   buying_intent?: BuyingIntent;
@@ -202,6 +242,53 @@ export interface Lead {
   opportunity?: Opportunity;
   outreach_drafts?: OutreachDraft[];
   activities?: ActivityLog[];
+}
+
+export interface LocalBusinessCandidate {
+  company_name: string;
+  business_name?: string;
+  category: string;
+  subcategory?: string;
+  country: string;
+  state?: string;
+  city: string;
+  area?: string;
+  address?: string;
+  postal_code?: string;
+  phone?: string;
+  phone_status: VerificationStatus;
+  phone_source_name?: string;
+  phone_source_url?: string;
+  phone_observed_at?: string;
+  email?: string;
+  email_status?: VerificationStatus;
+  email_source?: string;
+  website_url?: string;
+  website_status: WebsiteStatus;
+  website_source?: string;
+  whatsapp_status: WhatsAppStatus;
+  whatsapp_source?: string;
+  rating?: number;
+  review_count?: number;
+  years_in_business?: number;
+  business_description?: string;
+  hours?: string;
+  social_profiles?: Record<string, string>;
+  lead_score: number;
+  evidence_confidence: number;
+  contact_confidence: number;
+  buying_intent: BuyingIntent;
+  intent_signal?: string;
+  potential_opportunity: string;
+  recommended_service: string;
+  secondary_services?: string[];
+  why_terminal_labs?: string;
+  source_names: string[];
+  source_urls: string[];
+  source_type: SourceType;
+  usage_permission: string;
+  retrieved_at: string;
+  lead_type: LeadType;
 }
 
 export interface DashboardAnalytics {

@@ -21,7 +21,14 @@ async def test_full_stack_verification():
         # Verify real lead provenance and contact confidence
         for lead in leads:
             assert lead["lead_type"] in ["REAL", "DEMO", "SYNTHETIC"]
-            assert lead["whatsapp_status"] in ["WHATSAPP_CONFIRMED", "PUBLIC_PHONE_ONLY", "WHATSAPP_UNKNOWN", "INVALID", "UNKNOWN"]
+            assert lead["whatsapp_status"] in [
+                "WHATSAPP_CONFIRMED", 
+                "BUSINESS_PUBLICLY_ADVERTISES_WHATSAPP", 
+                "PUBLIC_PHONE_ONLY", 
+                "WHATSAPP_UNKNOWN", 
+                "INVALID", 
+                "UNKNOWN"
+            ]
             if lead["score"]:
                 assert "evidence_confidence" in lead["score"]
                 assert "contact_confidence" in lead["score"]

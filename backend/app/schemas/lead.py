@@ -5,11 +5,17 @@ from pydantic import BaseModel, ConfigDict, Field
 # Base Models
 class LeadBase(BaseModel):
     company_name: str
+    business_name: Optional[str] = None
     domain: str
     website_url: Optional[str] = None
+    category: Optional[str] = None
+    subcategory: Optional[str] = None
     country: Optional[str] = "India"
     state: Optional[str] = None
     city: Optional[str] = None
+    area: Optional[str] = None
+    address: Optional[str] = None
+    postal_code: Optional[str] = None
     industry: Optional[str] = "Technology"
     company_size: Optional[str] = "11-50"
     linkedin_url: Optional[str] = None
@@ -23,6 +29,16 @@ class LeadBase(BaseModel):
     whatsapp_status: Optional[str] = "WHATSAPP_UNKNOWN"
     whatsapp_verification_method: Optional[str] = "Unverified link only"
     lead_type: Optional[str] = "REAL"
+    source_type: Optional[str] = "PUBLIC_BUSINESS_DIRECTORY"
+    usage_permission: Optional[str] = "Public Business Registry Data - Permitted Discovery Use"
+    rating: Optional[str] = None
+    review_count: Optional[int] = 0
+    years_in_business: Optional[str] = None
+    business_description: Optional[str] = None
+    hours: Optional[str] = None
+    social_profiles: Optional[Dict[str, Any]] = {}
+    global_fit_score: Optional[float] = 0.0
+    outsourcing_fit: Optional[str] = "MEDIUM"
     website_status: Optional[str] = "WEBSITE_PLUS_AUTOMATION"
     buying_intent: Optional[str] = "HIGH"
     intent_signal: Optional[str] = None
@@ -216,19 +232,26 @@ class LeadListResponse(BaseModel):
 # Discovery Trigger Schema
 class DiscoveryFilterRequest(BaseModel):
     industry: Optional[str] = None
+    category: Optional[str] = None
+    subcategory: Optional[str] = None
     country: Optional[str] = "India"
     state: Optional[str] = None
     city: Optional[str] = None
+    area: Optional[str] = None
     company_size: Optional[str] = None
     technology: Optional[str] = None
     service_type: Optional[str] = None
     target_service: Optional[str] = None
     website_status: Optional[str] = None
+    whatsapp_signal: Optional[str] = None
     buying_intent: Optional[str] = None
+    min_intent: Optional[str] = None
     min_score: Optional[int] = 0
     search_query: Optional[str] = None
-    search_keywords: Optional[List[str]] = []
+    search_keywords: Optional[Union[List[str], str]] = []
     buying_signals: Optional[List[str]] = []
+    source_type: Optional[str] = None
+    global_search: Optional[bool] = False
     limit: Optional[int] = 10
     max_results: Optional[int] = 10
     auto_qualify: bool = True

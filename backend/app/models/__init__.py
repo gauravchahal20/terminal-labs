@@ -49,8 +49,18 @@ class ContactStatusEnum:
     UNVERIFIED = "UNVERIFIED"
     UNKNOWN = "UNKNOWN"
 
+class SourceTypeEnum:
+    AUTHORIZED_BUSINESS_API = "AUTHORIZED_BUSINESS_API"
+    PUBLIC_BUSINESS_DIRECTORY = "PUBLIC_BUSINESS_DIRECTORY"
+    PUBLIC_COMPANY_WEBSITE = "PUBLIC_COMPANY_WEBSITE"
+    PUBLIC_BUSINESS_PROFILE = "PUBLIC_BUSINESS_PROFILE"
+    USER_PROVIDED_CSV = "USER_PROVIDED_CSV"
+    USER_PROVIDED_DATASET = "USER_PROVIDED_DATASET"
+    AUTHORIZED_SEARCH_PROVIDER = "AUTHORIZED_SEARCH_PROVIDER"
+
 class WhatsAppStatusEnum:
     WHATSAPP_CONFIRMED = "WHATSAPP_CONFIRMED"
+    BUSINESS_PUBLICLY_ADVERTISES_WHATSAPP = "BUSINESS_PUBLICLY_ADVERTISES_WHATSAPP"
     PUBLIC_PHONE_ONLY = "PUBLIC_PHONE_ONLY"
     WHATSAPP_UNKNOWN = "WHATSAPP_UNKNOWN"
     INVALID = "INVALID"
@@ -61,12 +71,18 @@ class Lead(Base):
 
     id = Column(String(36), primary_key=True, default=generate_uuid)
     company_name = Column(String(255), nullable=False, index=True)
+    business_name = Column(String(255), nullable=True)
     domain = Column(String(255), nullable=False, index=True)
     website_url = Column(String(500), nullable=False)
     
+    category = Column(String(100), nullable=True, index=True)
+    subcategory = Column(String(100), nullable=True)
     country = Column(String(100), default="India", index=True)
     state = Column(String(100), default="")
     city = Column(String(100), default="", index=True)
+    area = Column(String(100), nullable=True, index=True)
+    address = Column(Text, nullable=True)
+    postal_code = Column(String(50), nullable=True)
     industry = Column(String(100), default="Technology", index=True)
     company_size = Column(String(50), default="11-50")
     
@@ -79,15 +95,29 @@ class Lead(Base):
     phone_observed_at = Column(DateTime(timezone=True), default=utc_now)
     phone_verification_method = Column(String(255), default="Public Directory Inspection")
     
-    whatsapp_status = Column(String(50), default=WhatsAppStatusEnum.WHATSAPP_UNKNOWN) # WHATSAPP_CONFIRMED, PUBLIC_PHONE_ONLY, WHATSAPP_UNKNOWN, INVALID, UNKNOWN
+    whatsapp_status = Column(String(50), default=WhatsAppStatusEnum.WHATSAPP_UNKNOWN) # WHATSAPP_CONFIRMED, BUSINESS_PUBLICLY_ADVERTISES_WHATSAPP, PUBLIC_PHONE_ONLY, WHATSAPP_UNKNOWN, INVALID, UNKNOWN
     whatsapp_verification_method = Column(String(255), default="Unverified link only")
     
-    # Lead Type & Data Provenance
+    # Lead Type, Source Type & Data Provenance
     lead_type = Column(String(50), default=LeadTypeEnum.REAL, index=True) # REAL, DEMO, SYNTHETIC
+    source_type = Column(String(100), default=SourceTypeEnum.PUBLIC_BUSINESS_DIRECTORY, index=True)
+    usage_permission = Column(String(255), default="Public Business Registry Data - Permitted Discovery Use")
     source_urls = Column(JSON, default=list)
     source_names = Column(JSON, default=list) # e.g. ["Official Website", "MCA Corporate Filing", "LinkedIn Directory"]
     researched_at = Column(DateTime(timezone=True), default=utc_now)
     last_verified_at = Column(DateTime(timezone=True), default=utc_now)
+    
+    # Local Business Directory Attributes
+    rating = Column(String(20), nullable=True)
+    review_count = Column(Integer, default=0)
+    years_in_business = Column(String(50), nullable=True)
+    business_description = Column(Text, nullable=True)
+    hours = Column(String(255), nullable=True)
+    social_profiles = Column(JSON, default=dict) # {"facebook": "...", "instagram": "...", "linkedin": "...", "youtube": "...", "x": "..."}
+    
+    # Global / Outsourcing Fit
+    global_fit_score = Column(Float, default=0.0) # 0 - 100 for foreign prospects
+    outsourcing_fit = Column(String(50), default="MEDIUM") # HIGH, MEDIUM, LOW
     
     # Website Intelligence Classification
     website_status = Column(String(50), default=WebsiteStatusEnum.OUTDATED_WEBSITE, index=True)

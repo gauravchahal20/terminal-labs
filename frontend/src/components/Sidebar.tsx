@@ -15,11 +15,13 @@ import {
   Bot, 
   ChevronRight,
   ExternalLink,
-  Database
+  Database,
+  ShieldCheck
 } from "lucide-react";
 
 export type NavTab = 
   | "dashboard" 
+  | "discovery"
   | "leads" 
   | "companies" 
   | "research" 
@@ -35,6 +37,7 @@ interface SidebarProps {
   leadCount: number;
   onOpenServices: () => void;
   onOpenDirectoryExtractor?: () => void;
+  onOpenAudit?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -43,12 +46,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
   leadCount,
   onOpenServices,
   onOpenDirectoryExtractor,
+  onOpenAudit,
 }) => {
   const mainNavItems = [
     { id: "dashboard", label: "Overview", icon: LayoutDashboard },
+    { id: "discovery", label: "Prospector Engine", icon: Search },
     { id: "leads", label: "Lead Intelligence", icon: Users, badge: leadCount },
     { id: "companies", label: "Companies", icon: Building2 },
-    { id: "research", label: "Research", icon: Search },
+    { id: "research", label: "Research", icon: Layers },
     { id: "contacts", label: "Decision Makers", icon: UserCheck },
     { id: "pipeline", label: "Pipeline", icon: Kanban },
     { id: "campaigns", label: "Campaigns", icon: Send },
@@ -120,6 +125,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
             <span className="text-[9px] font-mono font-semibold px-1.5 py-0.5 rounded bg-orange-200/60 text-orange-800">
               NEW
+            </span>
+          </button>
+        )}
+
+        {onOpenAudit && (
+          <button
+            onClick={onOpenAudit}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
+              <span>Production Audit</span>
+            </div>
+            <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-200/70 text-emerald-900">
+              90%
             </span>
           </button>
         )}
