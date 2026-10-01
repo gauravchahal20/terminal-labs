@@ -16,11 +16,13 @@ import {
   ChevronRight,
   ExternalLink,
   Database,
-  ShieldCheck
+  ShieldCheck,
+  Zap
 } from "lucide-react";
 
 export type NavTab = 
   | "dashboard" 
+  | "cockpit"
   | "discovery"
   | "leads" 
   | "companies" 
@@ -50,6 +52,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const mainNavItems = [
     { id: "dashboard", label: "Overview", icon: LayoutDashboard },
+    { id: "cockpit", label: "Sales Cockpit", icon: Zap },
     { id: "discovery", label: "Prospector Engine", icon: Search },
     { id: "leads", label: "Lead Intelligence", icon: Users, badge: leadCount },
     { id: "companies", label: "Companies", icon: Building2 },

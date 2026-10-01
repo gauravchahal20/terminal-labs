@@ -45,7 +45,7 @@ interface LeadDetailDrawerProps {
   onReRunPipeline: (leadId: string) => void;
 }
 
-type TabType = "opportunity" | "intelligence" | "decision_makers" | "scoring" | "outreach" | "provenance" | "activity";
+type TabType = "opportunity" | "intelligence" | "decision_makers" | "scoring" | "evidence_graph" | "outreach" | "provenance" | "activity";
 
 export const LeadDetailDrawer: React.FC<LeadDetailDrawerProps> = ({
   lead,
@@ -329,6 +329,7 @@ ${draft?.whatsapp_message_body || ''}
               { id: "intelligence", label: "Web Presence & Gaps" },
               { id: "decision_makers", label: `Decision Makers (${lead.decision_makers?.length || 0})` },
               { id: "scoring", label: `7-Factor Score (${lead.score?.total_score || 0})` },
+              { id: "evidence_graph", label: "Evidence Graph" },
               { id: "outreach", label: "Outreach & Approval Gate" },
               { id: "provenance", label: "Data Provenance" },
               { id: "activity", label: `CRM Activity (${lead.activities?.length || 0})` }
@@ -847,6 +848,68 @@ ${draft?.whatsapp_message_body || ''}
                     <span className="text-[11px] text-[#7B7F73]">No direct phone number</span>
                   )}
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 6: EVIDENCE GRAPH (Feature 2) */}
+          {activeTab === "evidence_graph" && (
+            <div className="space-y-4 animate-in fade-in duration-200">
+              <div className="editorial-card p-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-semibold text-[#252620] flex items-center gap-1.5">
+                    <Layers className="w-4 h-4 text-[#59664A]" />
+                    <span>Evidence Graph & Provenance Chains</span>
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#E7EEDB] text-[#424C37] font-semibold">
+                    100% Traceable
+                  </span>
+                </div>
+                <p className="text-xs text-[#7B7F73]">
+                  Explicit separation of observed real-world facts from deterministic AI deductions. Every claim is mapped to verified public sources and observation timestamps.
+                </p>
+              </div>
+
+              {/* Graph Nodes */}
+              <div className="space-y-3">
+                {lead.evidence_graph && lead.evidence_graph.length > 0 ? (
+                  lead.evidence_graph.map((node, idx) => (
+                    <div
+                      key={idx}
+                      className={`p-4 rounded-xl border ${
+                        node.is_ai_inference
+                          ? "bg-[#FCFCF8] border-[#D1DCC2]"
+                          : "bg-white border-[#E2E4DA]"
+                      } space-y-2`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded ${
+                          node.is_ai_inference
+                            ? "bg-purple-50 text-purple-800 border border-purple-200"
+                            : "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                        }`}>
+                          {node.is_ai_inference ? "Deterministic AI Inference" : "Observed Real-World Fact"}
+                        </span>
+                        <span className="text-[10px] font-mono font-semibold text-[#59664A]">
+                          Confidence: {node.confidence || "HIGH"}
+                        </span>
+                      </div>
+
+                      <div className="text-xs font-semibold text-[#252620] leading-snug">
+                        {node.fact}
+                      </div>
+
+                      <div className="flex items-center justify-between pt-1 border-t border-[#E2E4DA] text-[10px] text-[#7B7F73]">
+                        <span className="truncate">Source: <strong className="text-[#252620]">{node.source}</strong></span>
+                        <span>{node.observed_at ? new Date(node.observed_at).toLocaleDateString() : "Observed 2026"}</span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-6 text-center text-xs text-[#7B7F73]">
+                    No evidence graph nodes generated yet.
+                  </div>
+                )}
               </div>
             </div>
           )}

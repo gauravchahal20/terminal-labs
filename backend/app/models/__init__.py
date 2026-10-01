@@ -115,9 +115,10 @@ class Lead(Base):
     hours = Column(String(255), nullable=True)
     social_profiles = Column(JSON, default=dict) # {"facebook": "...", "instagram": "...", "linkedin": "...", "youtube": "...", "x": "..."}
     
-    # Global / Outsourcing Fit
+    # Global / Outsourcing Fit & Agency Partner Opportunities
     global_fit_score = Column(Float, default=0.0) # 0 - 100 for foreign prospects
     outsourcing_fit = Column(String(50), default="MEDIUM") # HIGH, MEDIUM, LOW
+    partner_opportunity_type = Column(String(100), nullable=True) # WHITE_LABEL_DEV, TECH_IMPLEMENTATION, AI_ENGINEERING, OVERFLOW_DEV
     
     # Website Intelligence Classification
     website_status = Column(String(50), default=WebsiteStatusEnum.OUTDATED_WEBSITE, index=True)
@@ -127,6 +128,30 @@ class Lead(Base):
     intent_signal = Column(Text, nullable=True) # e.g. "Public post requesting React developer & WhatsApp automation"
     intent_source = Column(String(500), nullable=True) # e.g. "Public MCA filing & LinkedIn RFP listing"
     intent_timestamp = Column(DateTime(timezone=True), nullable=True)
+    
+    # Lead Quality Firewall & Validation
+    quality_firewall_status = Column(String(50), default="PASS", index=True) # PASS, WARNING, REVIEW_REQUIRED, REJECT
+    quality_firewall_flags = Column(JSON, default=list) # ["UNVERIFIED_CONTACT", "STALE_INTENT", "DUPLICATE_RISK"]
+    quality_firewall_reasons = Column(JSON, default=list)
+    
+    # Lead Freshness & Signal Decay
+    freshness_score = Column(Float, default=95.0) # 0.0 - 100.0
+    signal_age_days = Column(Integer, default=1)
+    decay_multiplier = Column(Float, default=1.0)
+    last_refreshed_at = Column(DateTime(timezone=True), default=utc_now)
+    
+    # Next Best Action Engine
+    next_best_action = Column(String(100), default="GENERATE_EMAIL", index=True) # RESEARCH_MORE, VERIFY_CONTACT, GENERATE_EMAIL, GENERATE_WHATSAPP, ADD_TO_CRM, WAIT_FOR_SIGNAL, FOLLOW_UP, BOOK_MEETING, NO_ACTION
+    next_best_action_reason = Column(Text, nullable=True)
+    
+    # Evidence Graph & Explainability ("Why This Lead" vs "Why Not")
+    evidence_graph = Column(JSON, default=list) # [{fact, source, url, observed_at, confidence, is_ai_inference}]
+    why_this_lead = Column(Text, nullable=True)
+    why_not_this_lead = Column(Text, nullable=True)
+    
+    # Human Feedback Loop & Adaptive Scoring
+    feedback_score_adjustment = Column(Float, default=0.0)
+    is_feedback_influenced = Column(Boolean, default=False)
     
     # CRM & Pipeline Status
     status = Column(String(50), default=LeadStatusEnum.NEW, index=True)
@@ -148,6 +173,7 @@ class Lead(Base):
     opportunity = relationship("Opportunity", back_populates="lead", uselist=False, cascade="all, delete-orphan")
     outreach_drafts = relationship("OutreachDraft", back_populates="lead", cascade="all, delete-orphan")
     activities = relationship("ActivityLog", back_populates="lead", cascade="all, delete-orphan")
+    feedbacks = relationship("LeadFeedback", back_populates="lead", cascade="all, delete-orphan")
 
 class CompanyResearch(Base):
     __tablename__ = "company_research"
@@ -428,3 +454,46 @@ class ActivityLog(Base):
     timestamp = Column(DateTime(timezone=True), default=utc_now)
 
     lead = relationship("Lead", back_populates="activities")
+
+class LeadFeedback(Base):
+    __tablename__ = "lead_feedbacks"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    lead_id = Column(String(36), ForeignKey("leads.id", ondelete="CASCADE"), nullable=False, index=True)
+    feedback_type = Column(String(50), nullable=False) # GOOD_LEAD, BAD_LEAD, WRONG_SERVICE, WRONG_CONTACT, USEFUL_MESSAGE, BAD_MESSAGE
+    adjustment_applied = Column(Float, default=0.0)
+    feedback_note = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), default=utc_now)
+
+    lead = relationship("Lead", back_populates="feedbacks")
+
+class SavedSearch(Base):
+    __tablename__ = "saved_searches"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    title = Column(String(255), nullable=False)
+    category = Column(String(100), nullable=True)
+    city = Column(String(100), nullable=True)
+    country = Column(String(100), default="India")
+    website_status = Column(String(50), default="All")
+    whatsapp_signal = Column(String(50), default="All")
+    buying_intent = Column(String(50), default="All")
+    keywords = Column(String(255), nullable=True)
+    auto_monitor = Column(Boolean, default=True)
+    last_checked_at = Column(DateTime(timezone=True), default=utc_now)
+    new_leads_detected_count = Column(Integer, default=0)
+    created_at = Column(DateTime(timezone=True), default=utc_now)
+
+class ICPProfile(Base):
+    __tablename__ = "icp_profiles"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    title = Column(String(255), nullable=False)
+    target_industries = Column(JSON, default=list) # ["Healthcare", "Dental", "Manufacturing", "SaaS"]
+    target_company_sizes = Column(JSON, default=list) # ["1-10", "11-50", "51-200"]
+    target_locations = Column(JSON, default=list) # ["Chandigarh", "Delhi", "USA", "UAE"]
+    preferred_services = Column(JSON, default=list) # ["Website Development", "AI Automation", "WhatsApp Business Automation"]
+    min_lead_score = Column(Float, default=70.0)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), default=utc_now)
+

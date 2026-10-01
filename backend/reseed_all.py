@@ -4,7 +4,8 @@ from datetime import datetime, timezone
 from sqlalchemy import delete
 from app.core.database import AsyncSessionLocal, init_db
 from app.models import (
-    Lead, CompanyResearch, DecisionMaker, LeadScore, Opportunity, OutreachDraft, ActivityLog, LeadStatusEnum
+    Lead, CompanyResearch, DecisionMaker, LeadScore, Opportunity, OutreachDraft, ActivityLog, LeadStatusEnum,
+    LeadFeedback, SavedSearch, ICPProfile
 )
 from app.services.seed_data import SAMPLE_COMPANIES
 from app.services.orchestrator import orchestrator
@@ -19,6 +20,9 @@ async def reseed():
 
     async with AsyncSessionLocal() as db:
         logger.info("Purging existing records...")
+        await db.execute(delete(LeadFeedback))
+        await db.execute(delete(SavedSearch))
+        await db.execute(delete(ICPProfile))
         await db.execute(delete(ActivityLog))
         await db.execute(delete(OutreachDraft))
         await db.execute(delete(Opportunity))

@@ -18,6 +18,7 @@ import { CampaignSequenceView } from "@/components/CampaignSequenceView";
 import { DirectoryExtractorModal } from "@/components/DirectoryExtractorModal";
 import { LocalDiscoveryView } from "@/components/LocalDiscoveryView";
 import { ProductionReadinessModal } from "@/components/ProductionReadinessModal";
+import { SalesCockpitView } from "@/components/SalesCockpitView";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<NavTab>("dashboard");
@@ -193,6 +194,7 @@ export default function Home() {
   const getTabDisplayName = () => {
     switch (activeTab) {
       case "dashboard": return "Overview";
+      case "cockpit": return "Sales Cockpit";
       case "discovery": return "Prospector Engine";
       case "leads": return "Lead Intelligence";
       case "companies": return "Companies";
@@ -257,6 +259,13 @@ export default function Home() {
                   onOpenAgentTerminal={() => setIsAgentTerminalOpen(true)}
                   onExploreServices={() => setIsServicesCatalogOpen(true)}
                   onViewAllLeads={handleViewAllLeadsFiltered}
+                />
+              )}
+
+              {activeTab === "cockpit" && (
+                <SalesCockpitView
+                  onSelectLead={(id) => setSelectedLeadId(id)}
+                  onOpenDiscovery={() => setActiveTab("discovery")}
                 />
               )}
 

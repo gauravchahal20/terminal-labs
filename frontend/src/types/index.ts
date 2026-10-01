@@ -215,6 +215,7 @@ export interface Lead {
   social_profiles?: Record<string, string>;
   global_fit_score?: number;
   outsourcing_fit?: string;
+  partner_opportunity_type?: string;
   source_type?: SourceType;
   usage_permission?: string;
   lead_type?: LeadType;
@@ -223,6 +224,27 @@ export interface Lead {
   intent_signal?: string;
   intent_source?: string;
   intent_timestamp?: string;
+  quality_firewall_status?: "PASS" | "WARNING" | "REVIEW_REQUIRED" | "REJECT";
+  quality_firewall_flags?: string[];
+  quality_firewall_reasons?: string[];
+  freshness_score?: number;
+  signal_age_days?: number;
+  decay_multiplier?: number;
+  last_refreshed_at?: string;
+  next_best_action?: string;
+  next_best_action_reason?: string;
+  evidence_graph?: Array<{
+    fact: string;
+    source: string;
+    url?: string;
+    observed_at?: string;
+    confidence?: string;
+    is_ai_inference?: boolean;
+  }>;
+  why_this_lead?: string;
+  why_not_this_lead?: string;
+  feedback_score_adjustment?: number;
+  is_feedback_influenced?: boolean;
   source_urls?: string[];
   source_names?: string[];
   researched_at?: string;
@@ -242,6 +264,74 @@ export interface Lead {
   opportunity?: Opportunity;
   outreach_drafts?: OutreachDraft[];
   activities?: ActivityLog[];
+}
+
+export interface CockpitTodayData {
+  summary: {
+    actionable_leads_count: number;
+    buying_signals_count: number;
+    pending_approvals_count: number;
+    verifications_needed_count: number;
+    total_active_pipeline: number;
+  };
+  next_best_action_breakdown: Record<string, number>;
+  high_fit_leads: Array<{
+    id: string;
+    company_name: string;
+    category: string;
+    city: string;
+    country: string;
+    score: number;
+    recommended_service: string;
+    website_status: string;
+    buying_intent: string;
+    next_best_action: string;
+    next_best_action_reason: string;
+    why_this_lead: string;
+  }>;
+  active_buying_signals: Array<{
+    id: string;
+    company_name: string;
+    signal: string;
+    source: string;
+    buying_intent: string;
+    service: string;
+    timestamp: string;
+  }>;
+  drafts_waiting_approval: Array<{
+    draft_id: string;
+    lead_id: string;
+    company_name: string;
+    service: string;
+    subject: string;
+    preview: string;
+    has_whatsapp: boolean;
+    created_at: string;
+  }>;
+  contacts_to_verify: Array<{
+    id: string;
+    company_name: string;
+    phone: string;
+    whatsapp_status: string;
+    quality_firewall_status: string;
+    quality_firewall_flags: string[];
+  }>;
+}
+
+export interface SavedSearchItem {
+  id: string;
+  title: string;
+  category?: string;
+  city?: string;
+  country?: string;
+  website_status?: string;
+  whatsapp_signal?: string;
+  buying_intent?: string;
+  keywords?: string;
+  auto_monitor: boolean;
+  new_leads_detected_count: number;
+  last_checked_at?: string;
+  created_at: string;
 }
 
 export interface LocalBusinessCandidate {

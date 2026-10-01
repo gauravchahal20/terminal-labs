@@ -285,6 +285,45 @@ export class ApiService {
     return this.request("/analytics/production-readiness");
   }
 
+  // Next-Gen Sales Cockpit & AI Intelligence (Phase 6)
+  static async getTodayCockpit(): Promise<any> {
+    return this.request("/cockpit/today");
+  }
+
+  static async askNaturalLanguage(query: string): Promise<{
+    status: string;
+    interpreted_filter: any;
+    total_results: number;
+    businesses: any[];
+  }> {
+    return this.request("/cockpit/ask", {
+      method: "POST",
+      body: JSON.stringify({ query }),
+    });
+  }
+
+  static async getLookalikes(leadId: string): Promise<any> {
+    return this.request(`/cockpit/lookalike/${leadId}`);
+  }
+
+  static async submitFeedback(leadId: string, feedbackType: string, note?: string): Promise<any> {
+    return this.request("/cockpit/feedback", {
+      method: "POST",
+      body: JSON.stringify({ lead_id: leadId, feedback_type: feedbackType, note }),
+    });
+  }
+
+  static async getSavedSearches(): Promise<any[]> {
+    return this.request("/cockpit/saved-searches");
+  }
+
+  static async createSavedSearch(data: any): Promise<any> {
+    return this.request("/cockpit/saved-searches", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
   // Health
   static async getHealth(): Promise<{ status: string; service: string; environment: string; demo_mode: boolean }> {
     return this.request("/health");
