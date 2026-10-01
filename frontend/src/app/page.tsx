@@ -15,6 +15,7 @@ import { NewLeadModal } from "@/components/NewLeadModal";
 import { ResearchPanelView } from "@/components/ResearchPanelView";
 import { EmailSettingsModal } from "@/components/EmailSettingsModal";
 import { CampaignSequenceView } from "@/components/CampaignSequenceView";
+import { DirectoryExtractorModal } from "@/components/DirectoryExtractorModal";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<NavTab>("dashboard");
@@ -34,6 +35,7 @@ export default function Home() {
   const [isServicesCatalogOpen, setIsServicesCatalogOpen] = useState(false);
   const [isNewLeadModalOpen, setIsNewLeadModalOpen] = useState(false);
   const [isEmailSettingsOpen, setIsEmailSettingsOpen] = useState(false);
+  const [isDirectoryExtractorOpen, setIsDirectoryExtractorOpen] = useState(false);
 
   // Email Connection State
   const [connectedEmail, setConnectedEmail] = useState("partnerships@terminallabs.com");
@@ -213,6 +215,7 @@ export default function Home() {
         }}
         leadCount={leads.length}
         onOpenServices={() => setIsServicesCatalogOpen(true)}
+        onOpenDirectoryExtractor={() => setIsDirectoryExtractorOpen(true)}
       />
 
       {/* 2. MAIN CONTENT AREA */}
@@ -341,6 +344,12 @@ export default function Home() {
           setConnectedEmail(acc.connected_email || acc.sender_email);
           setIsMailConnected(acc.is_connected);
         }}
+      />
+
+      <DirectoryExtractorModal
+        isOpen={isDirectoryExtractorOpen}
+        onClose={() => setIsDirectoryExtractorOpen(false)}
+        onLeadsIngested={() => refreshData()}
       />
     </div>
   );

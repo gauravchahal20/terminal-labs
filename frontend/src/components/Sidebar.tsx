@@ -14,7 +14,8 @@ import {
   Layers, 
   Bot, 
   ChevronRight,
-  ExternalLink
+  ExternalLink,
+  Database
 } from "lucide-react";
 
 export type NavTab = 
@@ -33,6 +34,7 @@ interface SidebarProps {
   setActiveTab: (tab: NavTab) => void;
   leadCount: number;
   onOpenServices: () => void;
+  onOpenDirectoryExtractor?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -40,6 +42,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setActiveTab,
   leadCount,
   onOpenServices,
+  onOpenDirectoryExtractor,
 }) => {
   const mainNavItems = [
     { id: "dashboard", label: "Overview", icon: LayoutDashboard },
@@ -104,8 +107,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </nav>
       </div>
 
-      {/* Services Button & User Profile Bottom */}
-      <div className="p-4 space-y-3 border-t border-[#E2E4DA] bg-[#FCFCF8]">
+      {/* Services & Extractor Button & User Profile Bottom */}
+      <div className="p-4 space-y-2 border-t border-[#E2E4DA] bg-[#FCFCF8]">
+        {onOpenDirectoryExtractor && (
+          <button
+            onClick={onOpenDirectoryExtractor}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-orange-700 bg-orange-50 hover:bg-orange-100 border border-orange-200 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <Database className="w-3.5 h-3.5 text-orange-600" />
+              <span>JustDial Extractor</span>
+            </div>
+            <span className="text-[9px] font-mono font-semibold px-1.5 py-0.5 rounded bg-orange-200/60 text-orange-800">
+              NEW
+            </span>
+          </button>
+        )}
+
         <button
           onClick={onOpenServices}
           className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-[#59664A] bg-[#E7EEDB]/60 hover:bg-[#E7EEDB] border border-[#D1DCC2] transition-colors"

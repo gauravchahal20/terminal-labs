@@ -213,6 +213,40 @@ export class ApiService {
     return this.request(`/agents/discovery-runs?limit=${limit}`);
   }
 
+  // Directory Extractor (JustDial / IndiaMART / Local)
+  static async extractDirectoryLeads(params: {
+    industry_or_keyword?: string;
+    city?: string;
+    platform?: string;
+    has_no_website_only?: boolean;
+    limit?: number;
+    auto_ingest?: boolean;
+  }): Promise<any> {
+    return this.request("/directory/extract", {
+      method: "POST",
+      body: JSON.stringify(params),
+    });
+  }
+
+  static async parseRawDirectoryHtml(params: {
+    raw_html: string;
+    city?: string;
+    platform?: string;
+    auto_ingest?: boolean;
+  }): Promise<any> {
+    return this.request("/directory/parse-raw", {
+      method: "POST",
+      body: JSON.stringify(params),
+    });
+  }
+
+  static async ingestDirectoryLeads(records: any[], autoQualify = true): Promise<any> {
+    return this.request("/directory/ingest", {
+      method: "POST",
+      body: JSON.stringify({ records, auto_qualify: autoQualify }),
+    });
+  }
+
   // Health
   static async getHealth(): Promise<{ status: string; service: string; environment: string; demo_mode: boolean }> {
     return this.request("/health");
